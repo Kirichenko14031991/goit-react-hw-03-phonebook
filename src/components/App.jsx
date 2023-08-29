@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { nanoid } from 'nanoid';
-import { MainHeader, Header, MainWrap } from './App.styled'; 
+import { MainHeader, Header, MainWrap } from './App.styled';
 import ContactList from './contactList/contactList';
 import Filter from './contactFilter/contactFilter';
 import ContactForm from './contactForm/contactForm';
@@ -15,6 +15,20 @@ class App extends Component {
     ],
     filter: '',
   };
+
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+
+  componentDidUpdate(_, prevState) {
+    if (this.state.contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
 
   changeFilter = e => {
     this.setState({ ...this.state, filter: e.target.value });
@@ -37,16 +51,22 @@ class App extends Component {
     const { contacts, filter } = this.state;
     const normalizedFilter = filter.toLowerCase();
     const visibleContacts = contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedFilter),
+      contact.name.toLowerCase().includes(normalizedFilter)
     );
 
     return (
       <MainWrap>
         <MainHeader>Phonebook</MainHeader>
-        <ContactForm onFormSubmit={this.formSubmitHandler} contacts={contacts} />
+        <ContactForm
+          onFormSubmit={this.formSubmitHandler}
+          contacts={contacts}
+        />
         <Header>Contacts</Header>
         <Filter value={filter} onChange={this.changeFilter} />
-        <ContactList contacts={visibleContacts} onDeleteContact={this.deleteContact} />
+        <ContactList
+          contacts={visibleContacts}
+          onDeleteContact={this.deleteContact}
+        />
       </MainWrap>
     );
   }
